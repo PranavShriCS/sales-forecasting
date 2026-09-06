@@ -2,6 +2,11 @@ import pandas as pd
 
 from feature_engineering import create_features
 
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+import numpy as np
+
+from sklearn.ensemble import RandomForestRegressor
+
 train = create_features()
 
 print("Before removing NaNs:", train.shape)
@@ -82,3 +87,42 @@ print(X_train.head())
 
 print("Missing values in X_train:", X_train.isnull().sum().sum())
 print("Missing values in X_val:", X_val.isnull().sum().sum())
+
+baseline_predictions = X_val["Lag_1"]
+
+print("Baseline predictions:")
+print(baseline_predictions.head())
+
+baseline_rmse = np.sqrt(
+    mean_squared_error(y_val, baseline_predictions)
+)
+
+baseline_mae = mean_absolute_error(
+    y_val,
+    baseline_predictions
+)
+
+print("Baseline RMSE:", baseline_rmse)
+print("Baseline MAE:", baseline_mae)
+
+model = RandomForestRegressor(
+    n_estimators=100,
+    random_state=42,
+    n_jobs=-1
+)
+
+model.fit(X_train, y_train)
+
+rf_predictions = model.predict(X_val)
+
+rf_rmse = np.sqrt(
+    mean_squared_error(y_val, rf_predictions)
+)
+
+rf_mae = mean_absolute_error(
+    y_val,
+    rf_predictions
+)
+
+print("Random Forest RMSE:", rf_rmse)
+print("Random Forest MAE:", rf_mae)
