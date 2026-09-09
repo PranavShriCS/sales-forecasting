@@ -7,6 +7,8 @@ import numpy as np
 
 from sklearn.ensemble import RandomForestRegressor
 
+from sklearn.ensemble import GradientBoostingRegressor
+
 train = create_features()
 
 print("Before removing NaNs:", train.shape)
@@ -106,7 +108,8 @@ print("Baseline RMSE:", baseline_rmse)
 print("Baseline MAE:", baseline_mae)
 
 model = RandomForestRegressor(
-    n_estimators=100,
+    n_estimators=200,
+    max_features="sqrt",
     random_state=42,
     n_jobs=-1
 )
@@ -126,3 +129,38 @@ rf_mae = mean_absolute_error(
 
 print("Random Forest RMSE:", rf_rmse)
 print("Random Forest MAE:", rf_mae)
+
+gbr_model = GradientBoostingRegressor(
+    n_estimators=100,
+    learning_rate=0.1,
+    max_depth=3,
+    random_state=42
+)
+
+gbr_model.fit(X_train, y_train)
+
+gbr_predictions = gbr_model.predict(X_val)
+
+gbr_rmse = np.sqrt(
+    mean_squared_error(y_val, gbr_predictions)
+)
+
+gbr_mae = mean_absolute_error(
+    y_val,
+    gbr_predictions
+)
+
+print("Gradient Boosting RMSE:", gbr_rmse)
+print("Gradient Boosting MAE:", gbr_mae)
+
+rmse_improvement = (
+    (baseline_rmse - rf_rmse) / baseline_rmse
+) * 100
+
+mae_improvement = (
+    (baseline_mae - rf_mae) / baseline_mae
+) * 100
+
+print("\nModel improvement over baseline:")
+print("RMSE improvement:", rmse_improvement, "%")
+print("MAE improvement:", mae_improvement, "%")
